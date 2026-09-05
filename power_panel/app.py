@@ -114,36 +114,29 @@ def snapshot() -> dict:
 def start_like_mcup() -> None:
     """Match scripts/mc-up.sh: start if stopped, wait running, wait for Minecraft."""
     try:
-        _set_job("start", "working", "Checking instance state")
+        _set_job("start", "working", "Checking AWS")
         state = instance_state()
         if state == "stopping":
-            _set_job("start", "working", "Waiting for instance to finish stopping")
+            _set_job("start", "working", "Waiting for the last shutdown to finish")
             _ec2().get_waiter("instance_stopped").wait(InstanceIds=[INSTANCE_ID])
             state = "stopped"
         if state == "stopped":
-            _set_job("start", "working", "Starting instance")
+            _set_job("start", "working", "Starting the box")
             _ec2().start_instances(InstanceIds=[INSTANCE_ID])
         if state != "running":
-            _set_job("start", "working", "Waiting until instance is running")
+            _set_job("start", "working", "Waiting for the box to boot")
             _ec2().get_waiter("instance_running").wait(InstanceIds=[INSTANCE_ID])
         deadline = time.time() + WAIT_SECONDS
-        n = 0
         while time.time() < deadline:
-            n += 1
-            mc = minecraft_status()
-            if mc.get("online"):
-                _set_job(
-                    "start",
-                    "done",
-                    f"RLCraft is up. Connect at {MC_HOST}:{MC_PORT}",
-                )
+            if minecraft_status().get("online"):
+                _set_job("start", "done", "Server is ready")
                 return
-            _set_job("start", "working", f"Minecraft not ready yet (wait-{n})")
+            _set_job("start", "working", "Loading mods")
             time.sleep(10)
         _set_job(
             "start",
             "error",
-            f"Instance is running at {MC_HOST}, but Minecraft did not answer in time",
+            "The box is running, but Minecraft never answered. Try again or check the server.",
         )
     except ClientError as exc:
         _set_job("start", "error", exc.response["Error"].get("Message", str(exc)))
@@ -153,10 +146,10 @@ def start_like_mcup() -> None:
 
 def stop_instance() -> None:
     try:
-        _set_job("stop", "working", "Stopping instance")
+        _set_job("stop", "working", "Stopping the box")
         _ec2().stop_instances(InstanceIds=[INSTANCE_ID])
         _ec2().get_waiter("instance_stopped").wait(InstanceIds=[INSTANCE_ID])
-        _set_job("stop", "done", "Instance is stopped")
+        _set_job("stop", "done", "Box is stopped")
     except ClientError as exc:
         _set_job("stop", "error", exc.response["Error"].get("Message", str(exc)))
     except Exception as exc:

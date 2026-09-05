@@ -33,10 +33,10 @@
         <span class="dot" aria-hidden="true"></span>
         <span id="status-label">{% if data.minecraft.online %}Online{% elif data.instance_state == 'running' %}Booting{% elif data.instance_state == 'stopped' %}Offline{% else %}{{ data.instance_state|capitalize }}{% endif %}</span>
       </span>
-      <p id="status-hint" class="muted">Minecraft and the Discord bot start automatically with the box.</p>
+      <p id="status-hint" class="muted"{% if data.minecraft.online %} hidden{% endif %}>{% if data.instance_state == 'stopped' %}Press start, then give it about two minutes.{% elif data.instance_state == 'running' %}The box is up, Minecraft is still loading.{% endif %}</p>
     </section>
 
-    <section id="job-panel" class="job" {% if not data.job.message %}hidden{% endif %}>
+    <section id="job-panel" class="job" {% if data.job.state not in ['working', 'error'] %}hidden{% endif %}>
       <div class="job-head">
         <span id="job-message">{{ data.job.message }}</span>
         <span id="job-elapsed" class="muted mono"></span>

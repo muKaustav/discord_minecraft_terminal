@@ -36,22 +36,24 @@ if (panel) {
   let job = { state: "idle", started_at: null };
   let lastSuccess = Date.now();
 
+  // The hint stays empty whenever the pill or the job panel already says it.
   const describe = (data) => {
     const busy = data.job && data.job.state === "working";
     const state = data.instance_state;
     if (data.minecraft && data.minecraft.online) {
-      return { label: "Online", tone: "ok", hint: "Server is accepting players." };
+      return { label: "Online", tone: "ok", hint: "" };
     }
     if (busy || state === "pending" || state === "stopping") {
-      return { label: busy && data.job.action === "stop" ? "Stopping" : "Starting", tone: "busy", hint: "This takes about two minutes." };
+      const stopping = (busy && data.job.action === "stop") || state === "stopping";
+      return { label: stopping ? "Stopping" : "Starting", tone: "busy", hint: "" };
     }
     if (state === "running") {
-      return { label: "Booting", tone: "busy", hint: "Box is up, Minecraft is still loading." };
+      return { label: "Booting", tone: "busy", hint: "The box is up, Minecraft is still loading." };
     }
     if (state === "stopped") {
-      return { label: "Offline", tone: "off", hint: "Press start and wait about two minutes." };
+      return { label: "Offline", tone: "off", hint: "Press start, then give it about two minutes." };
     }
-    return { label: state, tone: "off", hint: "Waiting on AWS." };
+    return { label: state, tone: "off", hint: "" };
   };
 
   const elapsed = () => {
@@ -66,6 +68,7 @@ if (panel) {
     els.pill.className = `pill pill-${status.tone}`;
     els.label.textContent = status.label;
     els.hint.textContent = status.hint;
+    els.hint.hidden = !status.hint;
 
     els.instance.textContent = data.instance_state;
     els.players.textContent = data.minecraft && data.minecraft.online
@@ -75,8 +78,12 @@ if (panel) {
 
     job = data.job || { state: "idle", started_at: null };
     const working = job.state === "working";
-    els.jobPanel.hidden = !job.message;
+    const failed = job.state === "error";
+    // A finished job has nothing left to report that the pill doesn't show.
+    els.jobPanel.hidden = !(working || failed);
+    els.jobPanel.classList.toggle("job-error", failed);
     els.jobMessage.textContent = job.message || "";
+    els.jobBar.hidden = failed;
     els.jobBar.classList.toggle("bar-active", working);
     els.jobElapsed.textContent = elapsed();
 

@@ -141,6 +141,12 @@ p { margin: 0; }
   font-size: 0.9rem;
 }
 
+.job-error {
+  border-color: rgba(209, 88, 74, 0.5);
+  background: rgba(209, 88, 74, 0.12);
+  color: #ffb3a8;
+}
+
 .bar {
   position: relative;
   height: 5px;
