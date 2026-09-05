@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RLCraft power</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>RLCraft power</h1>
+      <form method="post" action="{{ url_for('logout') }}"><button class="ghost" type="submit">Log out</button></form>
+    </header>
+    <p class="muted">Same start path as the local <code>mcup</code> alias. Minecraft and Discord come up on boot.</p>
+    <dl>
+      <div><dt>AWS</dt><dd id="instance-state">{{ data.instance_state }}</dd></div>
+      <div><dt>Minecraft</dt><dd id="mc-state">{% if data.minecraft.online %}online ({{ data.minecraft.players }}/{{ data.minecraft.max }}){% else %}offline{% endif %}</dd></div>
+      <div><dt>Connect</dt><dd><code id="connect">{{ data.connect }}</code></dd></div>
+      <div><dt>Job</dt><dd id="job">{{ data.job.message or data.job.state }}</dd></div>
+    </dl>
+    <div class="actions">
+      <button id="start" type="button">Start</button>
+      <button id="stop" class="danger" type="button">Stop</button>
+    </div>
+    <p id="error" class="error" hidden></p>
+  </main>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
