@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Start/stop the RLCraft EC2 box the same way the local mcup alias does."""
+"""Start/stop the Minecraft EC2 box the same way the local mcup alias does."""
 
 from __future__ import annotations
 

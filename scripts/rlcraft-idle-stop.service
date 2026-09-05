@@ -1,6 +1,6 @@
 [Unit]
-Description=Stop RLCraft VM after 30 minutes with no players
-After=network-online.target rlcraft.service
+Description=Stop the Minecraft VM after 30 minutes with no players
+After=network-online.target bmc5.service
 Wants=network-online.target
 
 [Service]

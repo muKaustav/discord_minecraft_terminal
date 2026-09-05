@@ -138,7 +138,7 @@ for i in $(seq 1 60); do
   if node "${STATUS_JS}" "${IP}" "${MC_PORT}" >/tmp/mc-up-status.json 2>/dev/null; then
     cat /tmp/mc-up-status.json
     echo
-    echo "RLCraft is up. Connect at ${IP}:${MC_PORT}"
+    echo "Minecraft is up. Connect at ${IP}:${MC_PORT}"
     echo "SSH: ssh mc"
     echo "Discord bot starts on the VM with the server."
     exit 0

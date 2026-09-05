@@ -25,11 +25,12 @@ if [[ ! -f package.json ]]; then
 fi
 npm install --omit=dev
 
+sudo cp /tmp/rlcraft-units/bmc5.service /etc/systemd/system/bmc5.service
 sudo cp /tmp/rlcraft-units/rlcraft-terminal.service /etc/systemd/system/rlcraft-terminal.service
 sudo cp /tmp/rlcraft-units/rlcraft-discord.service /etc/systemd/system/rlcraft-discord.service
 sudo cp /tmp/rlcraft-units/rlcraft-idle-stop.service /etc/systemd/system/rlcraft-idle-stop.service
 sudo systemctl daemon-reload
-sudo systemctl enable --now rlcraft.service
+sudo systemctl enable --now bmc5.service
 sudo systemctl enable --now rlcraft-terminal.service
 sudo systemctl enable --now rlcraft-discord.service
 sudo systemctl enable --now rlcraft-idle-stop.service
@@ -37,7 +38,7 @@ sudo systemctl restart rlcraft-terminal.service
 sudo systemctl restart rlcraft-discord.service
 sudo systemctl restart rlcraft-idle-stop.service
 
-systemctl is-active rlcraft.service
+systemctl is-active bmc5.service
 systemctl is-active rlcraft-terminal.service
 systemctl is-active rlcraft-discord.service
 systemctl is-active rlcraft-idle-stop.service

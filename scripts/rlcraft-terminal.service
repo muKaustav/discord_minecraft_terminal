@@ -1,8 +1,8 @@
 [Unit]
-Description=RLCraft Discord terminal (RCON and logs)
-After=network-online.target rlcraft.service
+Description=Minecraft Discord terminal (RCON and logs)
+After=network-online.target bmc5.service
 Wants=network-online.target
-Requires=rlcraft.service
+Requires=bmc5.service
 
 [Service]
 Type=simple
@@ -10,7 +10,7 @@ User=ubuntu
 Group=ubuntu
 WorkingDirectory=/opt/rlcraft-discord
 Environment=PYTHONUNBUFFERED=1
-Environment=LOG_FILE_PATH=/opt/rlcraft/logs/latest.log
+Environment=LOG_FILE_PATH=/opt/bmc5/logs/latest.log
 ExecStartPre=/opt/rlcraft-discord/wait-rcon.sh
 ExecStart=/opt/rlcraft-discord/venv/bin/python minecraft_terminal.py
 Restart=always

@@ -1,0 +1,20 @@
+[Unit]
+Description=Better MC BMC5 v51 (Minecraft 1.21.1 NeoForge)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/bmc5
+ExecStart=/opt/bmc5/start.sh
+Restart=on-failure
+RestartSec=15
+Nice=5
+# Minecraft saves the world on SIGTERM; 283 mods need a while to flush chunks.
+KillSignal=SIGTERM
+TimeoutStopSec=180
+
+[Install]
+WantedBy=multi-user.target
