@@ -1,0 +1,18 @@
+[Unit]
+Description=Stop RLCraft VM after 30 minutes with no players
+After=network-online.target rlcraft.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/rlcraft-idle
+Environment=IDLE_MINUTES=30
+Environment=POLL_SECONDS=60
+Environment=MC_PORT=25565
+ExecStart=/usr/bin/node /opt/rlcraft-idle/idle-stop.js
+Restart=always
+RestartSec=15
+
+[Install]
+WantedBy=multi-user.target

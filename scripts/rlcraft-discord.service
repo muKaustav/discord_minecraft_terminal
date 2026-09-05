@@ -1,0 +1,18 @@
+[Unit]
+Description=RLCraft Discord bot
+After=network-online.target rlcraft-terminal.service
+Wants=network-online.target
+Requires=rlcraft-terminal.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/rlcraft-discord
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/rlcraft-discord/venv/bin/python discord_integration.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

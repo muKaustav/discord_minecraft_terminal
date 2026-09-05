@@ -26,6 +26,7 @@ var/
 venv/
 ENV/
 env/
+scripts/node_modules/
 
 # Node.js (in case you also have JavaScript components)
 node_modules/

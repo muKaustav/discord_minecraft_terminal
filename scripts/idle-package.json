@@ -1,0 +1,8 @@
+{
+  "name": "rlcraft-idle",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "node-mcstatus": "1.2.1"
+  }
+}

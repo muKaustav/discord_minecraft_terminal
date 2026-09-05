@@ -1,0 +1,20 @@
+[Unit]
+Description=RLCraft Discord terminal (RCON and logs)
+After=network-online.target rlcraft.service
+Wants=network-online.target
+Requires=rlcraft.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/rlcraft-discord
+Environment=PYTHONUNBUFFERED=1
+Environment=LOG_FILE_PATH=/opt/rlcraft/logs/latest.log
+ExecStartPre=/opt/rlcraft-discord/wait-rcon.sh
+ExecStart=/opt/rlcraft-discord/venv/bin/python minecraft_terminal.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
