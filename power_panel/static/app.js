@@ -132,15 +132,47 @@ if (panel) {
     if (window.confirm(warn)) post("/api/stop");
   });
 
-  $("copy").addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(els.connect.textContent.trim());
-      const label = $("copy-label");
-      label.textContent = "Copied";
-      setTimeout(() => { label.textContent = "Copy"; }, 1500);
-    } catch {
-      showError("Clipboard blocked. Copy the address manually.");
+  // navigator.clipboard only exists on HTTPS or localhost, and this panel is
+  // served over plain HTTP, so fall back to the old execCommand path.
+  const copyText = async (text) => {
+    if (window.isSecureContext && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch { /* fall through */ }
     }
+    const helper = document.createElement("textarea");
+    helper.value = text;
+    helper.setAttribute("readonly", "");
+    helper.style.position = "fixed";
+    helper.style.top = "-1000px";
+    document.body.appendChild(helper);
+    helper.select();
+    let copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } catch { /* reported below */ }
+    helper.remove();
+    return copied;
+  };
+
+  const selectAddress = () => {
+    const range = document.createRange();
+    range.selectNodeContents(els.connect);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  };
+
+  $("copy").addEventListener("click", async () => {
+    const label = $("copy-label");
+    if (await copyText(els.connect.textContent.trim())) {
+      label.textContent = "Copied";
+    } else {
+      selectAddress();
+      label.textContent = "Ctrl+C";
+    }
+    setTimeout(() => { label.textContent = "Copy"; }, 1800);
   });
 
   // Poll faster while a job runs so progress feels live.
