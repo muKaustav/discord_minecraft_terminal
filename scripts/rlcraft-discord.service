@@ -1,8 +1,9 @@
 [Unit]
-Description=RLCraft Discord bot
+Description=Minecraft Discord bot
 After=network-online.target rlcraft-terminal.service
-Wants=network-online.target
-Requires=rlcraft-terminal.service
+# Wants, not Requires: a Requires dependency that fails once cancels this job
+# for the whole boot, even after the terminal recovers on its own.
+Wants=network-online.target rlcraft-terminal.service
 
 [Service]
 Type=simple

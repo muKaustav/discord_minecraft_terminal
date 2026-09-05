@@ -16,6 +16,10 @@
 
 * { box-sizing: border-box; }
 
+/* Class selectors like `.job { display: grid }` outrank the UA rule for
+   [hidden], so hidden elements need this to actually stay hidden. */
+[hidden] { display: none !important; }
+
 html, body { height: 100%; }
 
 body {

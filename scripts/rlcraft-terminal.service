@@ -1,8 +1,9 @@
 [Unit]
 Description=Minecraft Discord terminal (RCON and logs)
 After=network-online.target bmc5.service
-Wants=network-online.target
-Requires=bmc5.service
+# Wants, not Requires: ExecStartPre already waits for RCON, and Restart=always
+# recovers on its own without a hard dependency cancelling the job.
+Wants=network-online.target bmc5.service
 
 [Service]
 Type=simple
@@ -15,6 +16,9 @@ ExecStartPre=/opt/rlcraft-discord/wait-rcon.sh
 ExecStart=/opt/rlcraft-discord/venv/bin/python minecraft_terminal.py
 Restart=always
 RestartSec=10
+# BMC5 needs ~95s to open RCON, which overruns the default 90s start timeout
+# and kills wait-rcon.sh mid-wait.
+TimeoutStartSec=600
 
 [Install]
 WantedBy=multi-user.target

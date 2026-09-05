@@ -1,5 +1,5 @@
 [Unit]
-Description=Minecraft AWS power switch web UI
+Description=Minecraft Booter web UI
 After=network-online.target
 Wants=network-online.target
 
