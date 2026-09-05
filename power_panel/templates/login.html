@@ -3,20 +3,41 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#17110d">
   <title>RLCraft power</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ asset_version }}">
 </head>
-<body>
-  <main class="card">
-    <h1>RLCraft power</h1>
-    <p class="muted">Friends can start the idle AWS box from here.</p>
-    {% if error %}<p class="error">{{ error }}</p>{% endif %}
-    <form method="post" action="{{ url_for('login') }}">
-      <label>Password
-        <input type="password" name="password" autofocus required>
+<body class="login-page">
+  <main class="card card-narrow" role="main">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/>
+        </svg>
+      </span>
+      <div>
+        <h1>RLCraft power</h1>
+        <p class="muted">Start the server without the AWS key.</p>
+      </div>
+    </div>
+
+    {% if error %}
+    <p class="alert alert-error" role="alert">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('login') }}" class="stack">
+      <label class="field" for="password">
+        <span class="field-label">Password</span>
+        <span class="field-input">
+          <input id="password" type="password" name="password" autocomplete="current-password" autofocus required>
+          <button type="button" class="reveal" data-reveal="password" aria-label="Show password">Show</button>
+        </span>
       </label>
-      <button type="submit">Open</button>
+      <button type="submit" class="btn btn-primary btn-block">Unlock</button>
     </form>
   </main>
+  <script src="{{ url_for('static', filename='app.js') }}?v={{ asset_version }}"></script>
 </body>
 </html>

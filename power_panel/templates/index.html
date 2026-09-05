@@ -3,28 +3,79 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#17110d">
   <title>RLCraft power</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ asset_version }}">
 </head>
 <body>
-  <main class="card">
-    <header>
-      <h1>RLCraft power</h1>
-      <form method="post" action="{{ url_for('logout') }}"><button class="ghost" type="submit">Log out</button></form>
+  <main class="card" role="main">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/>
+          </svg>
+        </span>
+        <div>
+          <h1>RLCraft power</h1>
+          <p class="muted">Mumbai · {{ data.instance_id }}</p>
+        </div>
+      </div>
+      <form method="post" action="{{ url_for('logout') }}">
+        <button class="btn btn-ghost" type="submit">Log out</button>
+      </form>
     </header>
-    <p class="muted">Same start path as the local <code>mcup</code> alias. Minecraft and Discord come up on boot.</p>
-    <dl>
-      <div><dt>AWS</dt><dd id="instance-state">{{ data.instance_state }}</dd></div>
-      <div><dt>Minecraft</dt><dd id="mc-state">{% if data.minecraft.online %}online ({{ data.minecraft.players }}/{{ data.minecraft.max }}){% else %}offline{% endif %}</dd></div>
-      <div><dt>Connect</dt><dd><code id="connect">{{ data.connect }}</code></dd></div>
-      <div><dt>Job</dt><dd id="job">{{ data.job.message or data.job.state }}</dd></div>
+
+    <section class="status" aria-live="polite">
+      <span id="status-pill" class="pill pill-{{ 'ok' if data.minecraft.online else ('busy' if data.instance_state in ['pending', 'stopping'] or data.job.state == 'working' else 'off') }}">
+        <span class="dot" aria-hidden="true"></span>
+        <span id="status-label">{% if data.minecraft.online %}Online{% elif data.instance_state == 'running' %}Booting{% elif data.instance_state == 'stopped' %}Offline{% else %}{{ data.instance_state|capitalize }}{% endif %}</span>
+      </span>
+      <p id="status-hint" class="muted">Minecraft and the Discord bot start automatically with the box.</p>
+    </section>
+
+    <section id="job-panel" class="job" {% if not data.job.message %}hidden{% endif %}>
+      <div class="job-head">
+        <span id="job-message">{{ data.job.message }}</span>
+        <span id="job-elapsed" class="muted mono"></span>
+      </div>
+      <div id="job-bar" class="bar {% if data.job.state == 'working' %}bar-active{% endif %}"><span></span></div>
+    </section>
+
+    <dl class="stats">
+      <div>
+        <dt>AWS instance</dt>
+        <dd id="instance-state">{{ data.instance_state }}</dd>
+      </div>
+      <div>
+        <dt>Players</dt>
+        <dd id="mc-state">{% if data.minecraft.online %}{{ data.minecraft.players }} / {{ data.minecraft.max }}{% else %}—{% endif %}</dd>
+      </div>
+      <div class="stat-wide">
+        <dt>Server address</dt>
+        <dd>
+          <button id="copy" class="copy" type="button" title="Copy address">
+            <code id="connect">{{ data.connect }}</code>
+            <span id="copy-label" class="copy-label">Copy</span>
+          </button>
+        </dd>
+      </div>
     </dl>
+
     <div class="actions">
-      <button id="start" type="button">Start</button>
-      <button id="stop" class="danger" type="button">Stop</button>
+      <button id="start" class="btn btn-primary" type="button" {% if not data.can_start %}disabled{% endif %}>Start server</button>
+      <button id="stop" class="btn btn-danger" type="button" {% if not data.can_stop %}disabled{% endif %}>Stop server</button>
     </div>
-    <p id="error" class="error" hidden></p>
+
+    <p id="error" class="alert alert-error" role="alert" hidden></p>
+
+    <footer class="foot">
+      <span id="updated" class="muted">Live</span>
+      <span class="muted">Idle for 30 min stops the box on its own.</span>
+    </footer>
   </main>
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script src="{{ url_for('static', filename='app.js') }}?v={{ asset_version }}"></script>
 </body>
 </html>

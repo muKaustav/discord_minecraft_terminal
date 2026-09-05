@@ -24,11 +24,16 @@ WAIT_SECONDS = int(os.environ.get("MC_WAIT_SECONDS", "600"))
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "change-me")
 
+# Static files are only replaced when the service restarts, so a boot-time
+# stamp is enough to stop browsers serving a stale panel.
+ASSET_VERSION = str(int(time.time()))
+
 _lock = threading.Lock()
 _job = {
     "action": None,
     "state": "idle",
     "message": "",
+    "started_at": None,
     "updated_at": None,
 }
 
@@ -38,7 +43,14 @@ def _now() -> str:
 
 
 def _set_job(action: str, state: str, message: str) -> None:
+    if _job["state"] != "working" and state == "working":
+        _job["started_at"] = _now()
     _job.update(action=action, state=state, message=message, updated_at=_now())
+
+
+@app.context_processor
+def inject_asset_version():
+    return {"asset_version": ASSET_VERSION}
 
 
 def _ec2():
@@ -64,11 +76,15 @@ def minecraft_status() -> dict:
     try:
         status = JavaServer.lookup(f"{MC_HOST}:{MC_PORT}", timeout=3).status()
         players = status.players
+        motd_obj = getattr(status, "motd", "")
+        motd = getattr(motd_obj, "to_plain", lambda: str(motd_obj))()
+        if not isinstance(motd, str):
+            motd = str(motd)
         return {
             "online": True,
             "players": getattr(players, "online", 0) or 0,
             "max": getattr(players, "max", 0) or 0,
-            "motd": str(getattr(status, "motd", "") or ""),
+            "motd": motd,
         }
     except Exception as exc:
         return {"online": False, "error": str(exc)}
@@ -82,6 +98,7 @@ def snapshot() -> dict:
         state = "unknown"
         aws_error = str(exc)
     mc = minecraft_status() if state == "running" else {"online": False}
+    busy = _job["state"] == "working"
     return {
         "instance_id": INSTANCE_ID,
         "instance_state": state,
@@ -89,6 +106,8 @@ def snapshot() -> dict:
         "connect": f"{MC_HOST}:{MC_PORT}",
         "minecraft": mc,
         "job": dict(_job),
+        "can_start": not busy and not (state == "running" and mc.get("online")),
+        "can_stop": not busy and state != "stopped",
     }
 
 
