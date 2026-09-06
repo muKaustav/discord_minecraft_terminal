@@ -154,13 +154,13 @@ def _give_pack_to_server_user(pack_dir: Path) -> None:
 
 
 def install(manifest: dict) -> Path:
-    url = manifest.get("server_download_url", "")
-    if not url.startswith("https://"):
-        raise ValueError("CurseForge did not return a secure server-pack download URL.")
     server_file_id = int(manifest["server_file_id"])
     final_dir = PACKS / str(server_file_id)
     if final_dir.exists():
         return final_dir
+    url = manifest.get("server_download_url", "")
+    if not url.startswith("https://"):
+        raise ValueError("CurseForge did not return a secure server-pack download URL.")
     ROOT.mkdir(mode=0o755, parents=True, exist_ok=True)
     PACKS.mkdir(mode=0o755, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=PACKS, prefix="staging-") as temp_dir:
