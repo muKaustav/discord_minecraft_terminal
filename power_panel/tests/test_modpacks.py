@@ -60,7 +60,7 @@ class CurseForgeResolutionTests(unittest.TestCase):
             "/v1/mods/123/files": {
                 "data": [
                     {"id": 100, "releaseType": 1, "serverPackFileId": 101, "dateReleased": "2026-09-01T00:00:00Z", "displayName": "v1", "gameVersions": ["1.21.1"]},
-                    {"id": 200, "releaseType": 1, "serverPackFileId": 201, "dateReleased": "2026-09-02T00:00:00Z", "displayName": "v2", "gameVersions": ["1.21.4"]},
+                    {"id": 200, "releaseType": 1, "serverPackFileId": 201, "dateReleased": "2026-09-02T00:00:00Z", "displayName": "v2", "gameVersions": ["NeoForge", "1.21.4"]},
                 ]
             },
             "/v1/mods/123/files/201": {"data": {"id": 201, "isServerPack": True, "fileName": "server-v2.zip", "downloadUrl": "https://cdn.example/v2.zip"}},
@@ -73,6 +73,8 @@ class CurseForgeResolutionTests(unittest.TestCase):
         self.assertEqual(resolved["client_file_id"], 200)
         self.assertEqual(resolved["server_file_id"], 201)
         self.assertEqual(resolved["server_download_url"], "https://cdn.example/v2.zip")
+        self.assertEqual(resolved["minecraft_version"], "1.21.4")
+        self.assertEqual(resolved["loader"], "NeoForge")
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import PurePosixPath
+import re
 from typing import Callable
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -131,6 +132,15 @@ class CurseForgeClient:
                     raise CurseForgeLinkError("This release has no published server pack.")
                 server_file = self._file(project_id, server_file_id)
 
+        game_versions = client_file.get("gameVersions", [])
+        minecraft_version = next(
+            (version for version in game_versions if re.match(r"^\d+\.\d+(?:\.\d+)?$", version)),
+            "Unknown",
+        )
+        loader = next(
+            (version for version in game_versions if version.lower() in {"forge", "neoforge", "fabric"}),
+            "Unknown",
+        )
         return {
             "project_id": project_id,
             "project_name": project.get("name", link.slug),
@@ -141,9 +151,6 @@ class CurseForgeClient:
             "server_file_id": server_file["id"],
             "server_file_name": server_file.get("fileName", "server-pack.zip"),
             "server_download_url": self._download_url(project_id, server_file),
-            "minecraft_version": next(iter(client_file.get("gameVersions", [])), "Unknown"),
-            "loader": next(
-                (version for version in client_file.get("gameVersions", []) if version in {"Forge", "NeoForge", "Fabric"}),
-                "Unknown",
-            ),
+            "minecraft_version": minecraft_version,
+            "loader": loader,
         }
