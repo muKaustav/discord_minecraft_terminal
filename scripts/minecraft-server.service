@@ -1,0 +1,19 @@
+[Unit]
+Description=Minecraft Booter selected modpack
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/minecraft-booter/current
+ExecStart=/opt/minecraft-booter/current/minecraft-booter-start.sh
+Restart=on-failure
+RestartSec=15
+Nice=5
+KillSignal=SIGTERM
+TimeoutStopSec=180
+
+[Install]
+WantedBy=multi-user.target

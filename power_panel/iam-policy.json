@@ -8,10 +8,35 @@
       "Resource": "*"
     },
     {
+      "Sid": "ReadAwsBill",
+      "Effect": "Allow",
+      "Action": [
+        "ce:GetCostAndUsage",
+        "budgets:ViewBudget",
+        "budgets:DescribeBudget"
+      ],
+      "Resource": "*"
+    },
+    {
       "Sid": "StartStopRlcraftOnly",
       "Effect": "Allow",
       "Action": ["ec2:StartInstances", "ec2:StopInstances"],
       "Resource": "arn:aws:ec2:ap-south-1:477327724152:instance/i-050606336b43db88f"
+    },
+    {
+      "Sid": "RunMinecraftBooterCommands",
+      "Effect": "Allow",
+      "Action": ["ssm:SendCommand"],
+      "Resource": [
+        "arn:aws:ssm:ap-south-1::document/AWS-RunShellScript",
+        "arn:aws:ec2:ap-south-1:477327724152:instance/i-050606336b43db88f"
+      ]
+    },
+    {
+      "Sid": "ReadMinecraftBooterCommands",
+      "Effect": "Allow",
+      "Action": ["ssm:GetCommandInvocation"],
+      "Resource": "*"
     }
   ]
 }

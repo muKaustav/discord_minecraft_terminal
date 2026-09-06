@@ -1,10 +1,12 @@
+{% from "_icons.html" import icon %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#17110d">
+  <meta name="csrf-token" content="{{ csrf_token }}">
   <title>Minecraft Booter</title>
   <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ asset_version }}">
@@ -20,11 +22,12 @@
         </span>
         <div>
           <h1>Minecraft Booter</h1>
-          <p class="muted">Better MC BMC5 · Mumbai</p>
+          <p id="active-pack-subtitle" class="muted">{{ data.modpacks.active.project_name if data.modpacks.active else 'Choose a modpack' }} · Mumbai</p>
         </div>
       </div>
       <form method="post" action="{{ url_for('logout') }}">
-        <button class="btn btn-ghost" type="submit">Log out</button>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn btn-ghost btn-icon" type="submit" title="Log out" aria-label="Log out">{{ icon('logout') }}</button>
       </form>
     </header>
 
@@ -34,6 +37,41 @@
         <span id="status-label">{% if data.minecraft.online %}Online{% elif data.instance_state == 'running' %}Booting{% elif data.instance_state == 'stopped' %}Offline{% else %}{{ data.instance_state|capitalize }}{% endif %}</span>
       </span>
       <p id="status-hint" class="muted"{% if data.minecraft.online %} hidden{% endif %}>{% if data.instance_state == 'stopped' %}Press start, then give it about two minutes.{% elif data.instance_state == 'running' %}The box is up, Minecraft is still loading.{% endif %}</p>
+    </section>
+
+    <section class="modpacks" aria-labelledby="modpacks-heading">
+      <div class="section-head">
+        <div>
+          <h2 id="modpacks-heading">Modpack</h2>
+          <p class="muted">One shared server. Every installed pack keeps its own world.</p>
+        </div>
+        <button id="show-add-pack" class="btn btn-ghost btn-small" type="button">Add modpack</button>
+      </div>
+      <label class="field" for="pack-select">
+        <span class="field-label">Installed packs</span>
+        <select id="pack-select" class="select-input" {% if data.modpacks.operation and data.modpacks.operation.state == 'working' %}disabled{% endif %}>
+          {% for pack in data.modpacks.packs %}
+          <option value="{{ pack.id }}" {% if data.modpacks.active and pack.id == data.modpacks.active.id %}selected{% endif %} {% if pack.state != 'ready' %}disabled{% endif %}>{{ pack.project_name }}{% if pack.client_file_name %} · {{ pack.client_file_name }}{% endif %}{% if pack.state != 'ready' %} ({{ pack.state }}){% endif %}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <div id="pack-details" class="pack-details">
+        {% if data.modpacks.active %}
+        <span id="pack-version">{{ data.modpacks.active.minecraft_version }} · {{ data.modpacks.active.loader }}</span>
+        <a id="client-download" href="{{ data.modpacks.active.client_url }}" target="_blank" rel="noopener">Client download</a>
+        {% endif %}
+      </div>
+      <form id="add-pack-form" class="add-pack" hidden>
+        <label class="field" for="curseforge-url">
+          <span class="field-label">CurseForge modpack link</span>
+          <span class="field-input"><input id="curseforge-url" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://www.curseforge.com/minecraft/modpacks/..." required></span>
+        </label>
+        <p id="resolved-pack" class="muted" hidden></p>
+        <div class="pack-actions">
+          <button id="resolve-pack" class="btn btn-ghost" type="button">Check link</button>
+          <button id="install-pack" class="btn btn-primary" type="submit" disabled>Install server pack</button>
+        </div>
+      </form>
     </section>
 
     <section id="job-panel" class="job" {% if data.job.state not in ['working', 'error'] %}hidden{% endif %}>
@@ -46,33 +84,45 @@
 
     <dl class="stats">
       <div>
-        <dt>AWS instance</dt>
+        <dt>{{ icon('server') }} AWS instance</dt>
         <dd id="instance-state">{{ data.instance_state }}</dd>
       </div>
       <div>
-        <dt>Players</dt>
+        <dt>{{ icon('users') }} Players</dt>
         <dd id="mc-state">{% if data.minecraft.online %}{{ data.minecraft.players }} / {{ data.minecraft.max }}{% else %}—{% endif %}</dd>
       </div>
+      <div>
+        <dt>{{ icon('trend') }} Forecast</dt>
+        <dd id="cost-hourly">{{ data.cost.hourly_label }}</dd>
+      </div>
+      <div>
+        <dt>{{ icon('wallet') }} This month</dt>
+        <dd id="cost-month">{{ data.cost.month_label }}</dd>
+        <div id="cost-bar" class="budget" title="{{ data.cost.note }}" hidden>
+          <span id="cost-bar-fill" style="width: {{ data.cost.percent or 0 }}%"></span>
+        </div>
+      </div>
       <div class="stat-wide">
-        <dt>Server address</dt>
+        <dt>{{ icon('link') }} Server address</dt>
         <dd>
-          <button id="copy" class="copy" type="button" title="Copy address">
+          <button id="copy" class="copy" type="button" title="Copy address" aria-label="Copy address">
             <code id="connect">{{ data.connect }}</code>
-            <span id="copy-label" class="copy-label">Copy</span>
+            <span data-copy-idle class="copy-icon">{{ icon('copy') }}</span>
+            <span data-copy-ok class="copy-icon" hidden>{{ icon('check') }}</span>
           </button>
         </dd>
       </div>
     </dl>
 
-    <div class="actions">
-      <button id="start" class="btn btn-primary" type="button" {% if not data.can_start %}disabled{% endif %}>Start server</button>
-      <button id="stop" class="btn btn-danger" type="button" {% if not data.can_stop %}disabled{% endif %}>Stop server</button>
+    <div id="actions" class="actions"{% if not data.can_start and not data.can_stop %} hidden{% endif %}>
+      <button id="start" class="btn btn-primary" type="button" {% if not data.can_start %}hidden disabled{% endif %}>{{ icon('play') }} Start</button>
+      <button id="stop" class="btn btn-danger" type="button" {% if not data.can_stop %}hidden disabled{% endif %}>{{ icon('stop') }} Stop</button>
     </div>
 
     <p id="error" class="alert alert-error" role="alert" hidden></p>
 
     <footer class="foot">
-      <span id="updated" class="muted">Live</span>
+      <span id="updated" class="muted" hidden></span>
       <span class="muted">Idle for 30 min stops the box on its own.</span>
     </footer>
   </main>

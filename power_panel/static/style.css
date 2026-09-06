@@ -20,14 +20,26 @@
    [hidden], so hidden elements need this to actually stay hidden. */
 [hidden] { display: none !important; }
 
-html, body { height: 100%; }
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 
 body {
   margin: 0;
-  padding: 24px 16px;
+  min-height: 100%;
+  min-height: 100dvh;
+  padding:
+    max(16px, env(safe-area-inset-top, 0px))
+    max(16px, env(safe-area-inset-right, 0px))
+    max(16px, env(safe-area-inset-bottom, 0px))
+    max(16px, env(safe-area-inset-left, 0px));
   display: flex;
   align-items: center;
+  align-items: safe center;
   justify-content: center;
+  overflow-x: clip;
   background:
     radial-gradient(900px 500px at 50% -10%, #35241a 0%, transparent 70%),
     var(--bg);
@@ -40,6 +52,7 @@ body {
 
 .card {
   width: min(520px, 100%);
+  max-width: 100%;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -56,6 +69,12 @@ h1 {
   font-size: 1.2rem;
   font-weight: 650;
   letter-spacing: -0.01em;
+}
+
+h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
 }
 
 p { margin: 0; }
@@ -75,7 +94,18 @@ p { margin: 0; }
   gap: 16px;
 }
 
-.brand { display: flex; align-items: center; gap: 12px; }
+.topbar form { flex: none; }
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.brand > div { min-width: 0; }
+
+.brand .muted { overflow-wrap: anywhere; }
 
 .brand-mark {
   display: grid;
@@ -137,6 +167,62 @@ p { margin: 0; }
   background: var(--surface-2);
 }
 
+/* modpacks */
+
+.modpacks {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-head > div { min-width: 0; }
+
+.btn-small { padding: 8px 10px; white-space: nowrap; }
+
+.select-input {
+  width: 100%;
+  appearance: auto;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #1b1410;
+  color: var(--text);
+  font: inherit;
+}
+
+.select-input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.pack-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.pack-details a { color: #f0b16f; }
+
+.add-pack {
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.pack-actions { display: flex; gap: 10px; }
+.pack-actions .btn { flex: 1; }
+
 .job-head {
   display: flex;
   align-items: baseline;
@@ -144,6 +230,8 @@ p { margin: 0; }
   gap: 12px;
   font-size: 0.9rem;
 }
+
+.job-head > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 
 .job-error {
   border-color: rgba(209, 88, 74, 0.5);
@@ -191,54 +279,99 @@ p { margin: 0; }
   padding: 14px 16px;
   display: grid;
   gap: 4px;
+  min-width: 0;
 }
 
 .stat-wide { grid-column: 1 / -1; }
 
 dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--muted);
 }
 
-dd { margin: 0; font-size: 1.02rem; font-weight: 600; }
+dt .icon { width: 13px; height: 13px; }
+
+dd {
+  margin: 0;
+  min-width: 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.budget {
+  margin-top: 8px;
+  height: 4px;
+  border-radius: 999px;
+  background: #3a2c22;
+  overflow: hidden;
+}
+
+.budget span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
 
 .copy {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
+  width: 100%;
+  min-width: 0;
   padding: 0;
   border: 0;
   background: none;
   color: inherit;
   font: inherit;
+  text-align: left;
   cursor: pointer;
 }
 
 .copy code {
+  min-width: 0;
   font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-  font-size: 0.95rem;
+  font-size: clamp(0.8rem, 3.6vw, 0.95rem);
+  overflow-wrap: anywhere;
 }
 
-.copy-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.copy-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
   color: var(--muted);
   border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 2px 7px;
+  padding: 6px;
 }
 
-.copy:hover .copy-label,
-.copy:focus-visible .copy-label { color: var(--text); border-color: var(--accent); }
+.copy-icon .icon { width: 14px; height: 14px; }
+
+.copy:hover .copy-icon,
+.copy:focus-visible .copy-icon { color: var(--text); border-color: var(--accent); }
 
 /* buttons */
 
-.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.actions { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+.icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  display: block;
+}
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font: inherit;
   font-weight: 650;
   padding: 12px 16px;
@@ -247,6 +380,8 @@ dd { margin: 0; font-size: 1.02rem; font-weight: 600; }
   cursor: pointer;
   transition: transform 0.06s ease, filter 0.15s ease, background 0.15s ease;
 }
+
+.btn-icon { width: 38px; height: 38px; padding: 0; }
 
 .btn:active:not(:disabled) { transform: translateY(1px); }
 
@@ -279,8 +414,10 @@ input:focus-visible {
 
 .field-input input {
   font: inherit;
+  font-size: 16px;
   width: 100%;
-  padding: 12px 68px 12px 14px;
+  min-width: 0;
+  padding: 12px 52px 12px 14px;
   border-radius: 10px;
   border: 1px solid var(--line);
   background: #1b1410;
@@ -294,17 +431,19 @@ input:focus-visible {
   right: 6px;
   top: 50%;
   transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
   background: none;
   border: 0;
   color: var(--muted);
-  font: inherit;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 6px 8px;
+  padding: 0;
   cursor: pointer;
   border-radius: 6px;
 }
+
+.reveal .icon { width: 18px; height: 18px; }
 
 .reveal:hover { color: var(--text); }
 
@@ -325,16 +464,59 @@ input:focus-visible {
 
 .foot {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 8px 16px;
   border-top: 1px solid var(--line);
   padding-top: 14px;
   font-size: 0.8rem;
 }
 
+@media (max-width: 560px) {
+  body {
+    padding:
+      max(12px, env(safe-area-inset-top, 0px))
+      max(12px, env(safe-area-inset-right, 0px))
+      max(12px, env(safe-area-inset-bottom, 0px))
+      max(12px, env(safe-area-inset-left, 0px));
+  }
+
+  .card {
+    padding: 20px 16px;
+    gap: 18px;
+    border-radius: 12px;
+  }
+
+  .topbar { gap: 10px; }
+
+  h1 { font-size: 1.08rem; }
+
+  .btn,
+  .btn-block { min-height: 44px; }
+
+  .btn-icon {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .copy-icon { min-width: 36px; min-height: 36px; }
+
+  .section-head { align-items: center; }
+  .pack-actions { flex-direction: column-reverse; }
+}
+
 @media (max-width: 420px) {
-  .card { padding: 22px 18px; }
-  .actions, .stats { grid-template-columns: 1fr; }
+  .stats > div { padding: 12px 12px; }
+
+  dt { font-size: 0.68rem; letter-spacing: 0.04em; }
+
+  dd { font-size: 0.95rem; }
+
+  .brand-mark { width: 34px; height: 34px; }
+
+  .job-head { flex-wrap: wrap; }
+
   .foot { flex-direction: column; gap: 4px; }
 }
 

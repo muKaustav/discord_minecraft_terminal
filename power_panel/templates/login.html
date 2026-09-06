@@ -1,8 +1,9 @@
+{% from "_icons.html" import icon %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#17110d">
   <title>Minecraft Booter</title>
@@ -28,14 +29,18 @@
     {% endif %}
 
     <form method="post" action="{{ url_for('login') }}" class="stack">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <label class="field" for="password">
         <span class="field-label">Password</span>
         <span class="field-input">
           <input id="password" type="password" name="password" autocomplete="current-password" autofocus required>
-          <button type="button" class="reveal" data-reveal="password" aria-label="Show password">Show</button>
+          <button type="button" class="reveal" data-reveal="password" aria-label="Show password">
+            <span data-eye-show>{{ icon('eye') }}</span>
+            <span data-eye-hide hidden>{{ icon('eye-off') }}</span>
+          </button>
         </span>
       </label>
-      <button type="submit" class="btn btn-primary btn-block">Unlock</button>
+      <button type="submit" class="btn btn-primary btn-block">{{ icon('unlock') }} Unlock</button>
     </form>
   </main>
   <script src="{{ url_for('static', filename='app.js') }}?v={{ asset_version }}"></script>

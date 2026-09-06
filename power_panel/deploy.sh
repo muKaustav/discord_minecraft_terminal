@@ -8,7 +8,7 @@ TARGET="${TARGET:-/opt/rlcraft-power}"
 
 git -C "$REPO" fetch origin
 git -C "$REPO" reset --hard origin/main
-sudo rsync -a --delete --exclude venv --exclude .env "$REPO/power_panel/" "$TARGET/"
+sudo rsync -a --delete --exclude venv --exclude .env --exclude '*.sqlite3' "$REPO/power_panel/" "$TARGET/"
 sudo chown -R ubuntu:ubuntu "$TARGET"
 "$TARGET/venv/bin/pip" install -q -r "$TARGET/requirements.txt"
 sudo cp "$TARGET/rlcraft-power.service" /etc/systemd/system/rlcraft-power.service

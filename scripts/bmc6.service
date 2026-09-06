@@ -1,0 +1,19 @@
+[Unit]
+Description=Better MC BMC6 v3 (Minecraft 26.1.2 NeoForge)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/bmc6
+ExecStart=/opt/bmc6/start.sh
+Restart=on-failure
+RestartSec=15
+Nice=5
+KillSignal=SIGTERM
+TimeoutStopSec=180
+
+[Install]
+WantedBy=multi-user.target
